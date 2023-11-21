@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "394496797826",
+    "firebase_url": "https://flutterkost-default-rtdb.firebaseio.com",
+    "project_id": "flutterkost",
+    "storage_bucket": "flutterkost.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:394496797826:android:05397f97f25faca85c989b",
+        "android_client_info": {
+          "package_name": "com.example.projectkost"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyRK4Yj1runiw3e28-wH4zpKWpIfoHYeE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:394496797826:android:d71551c920497a215c989b",
+        "android_client_info": {
+          "package_name": "com.irfanskostrentapp.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyRK4Yj1runiw3e28-wH4zpKWpIfoHYeE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
