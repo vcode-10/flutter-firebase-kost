@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/pages/auth_checker.dart';
+import 'package:projectkost/pages/profile_page.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_circleimage.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle.dart';
 import 'package:projectkost/widgets/app_bar/appbar_trailing_image.dart';
@@ -67,11 +68,13 @@ class _HomeProfileState extends State<HomeProfile> {
                 iconlyCurvedWallet:
                     ImageConstant.imgIconlyCurvedCalendarGray90001,
                 payments: "Kontrakan Saya".tr,
+                onPressed: () async {},
               ),
               SizedBox(height: 20.v),
               _buildAutoLayoutHorizontal(
                 iconlyCurvedWallet: ImageConstant.imgIconlyCurvedWallet,
                 payments: "Buat Kontrakan".tr,
+                onPressed: () async {},
               ),
               SizedBox(height: 20.v),
               const Divider(),
@@ -79,6 +82,13 @@ class _HomeProfileState extends State<HomeProfile> {
               _buildAutoLayoutHorizontal(
                 iconlyCurvedWallet: ImageConstant.imgUserGray90001,
                 payments: "Profile".tr,
+                onPressed: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProfilePage()),
+                  );
+                },
               ),
               SizedBox(height: 19.v),
               const Divider(),
@@ -148,6 +158,7 @@ class _HomeProfileState extends State<HomeProfile> {
   Widget _buildAutoLayoutHorizontal({
     required String iconlyCurvedWallet,
     required String payments,
+    required VoidCallback onPressed,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -162,10 +173,13 @@ class _HomeProfileState extends State<HomeProfile> {
             left: 20.h,
             top: 5.v,
           ),
-          child: Text(
-            payments,
-            style: CustomTextStyles.titleMediumGray90001SemiBold18.copyWith(
-              color: appTheme.gray90001,
+          child: TextButton(
+            onPressed: onPressed,
+            child: Text(
+              payments.tr,
+              style: CustomTextStyles.titleMediumGray90001SemiBold18.copyWith(
+                color: appTheme.gray90001,
+              ),
             ),
           ),
         ),
