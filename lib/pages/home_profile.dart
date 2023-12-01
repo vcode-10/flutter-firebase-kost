@@ -1,8 +1,8 @@
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/pages/auth_checker.dart';
+import 'package:projectkost/pages/create_page.dart';
 import 'package:projectkost/pages/profile_page.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_circleimage.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle.dart';
@@ -20,6 +20,25 @@ class HomeProfile extends StatefulWidget {
 
 class _HomeProfileState extends State<HomeProfile> {
   final user = FirebaseAuth.instance.currentUser;
+  String username = '';
+  var urlImageProfile;
+
+  @override
+  void initState() {
+    super.initState();
+    userData();
+  }
+
+  void userData() async {
+    DataSnapshot snapshot =
+        await FirebaseDatabase.instance.ref('users/${user?.uid}').get();
+
+    Map dataUser = snapshot.value as Map;
+    setState(() {
+      username = dataUser['username'].toString();
+      urlImageProfile = dataUser['urlImageProfile'];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +58,8 @@ class _HomeProfileState extends State<HomeProfile> {
                   alignment: Alignment.bottomRight,
                   children: [
                     CustomImageView(
-                      imagePath: ImageConstant.imgEllipse140x140,
+                      imagePath:
+                          urlImageProfile ?? ImageConstant.imgEllipse160x160,
                       height: 140.adaptSize,
                       width: 140.adaptSize,
                       radius: BorderRadius.circular(
@@ -47,18 +67,12 @@ class _HomeProfileState extends State<HomeProfile> {
                       ),
                       alignment: Alignment.center,
                     ),
-                    CustomImageView(
-                      imagePath: ImageConstant.imgEdit,
-                      height: 35.adaptSize,
-                      width: 35.adaptSize,
-                      alignment: Alignment.bottomRight,
-                    ),
                   ],
                 ),
               ),
               SizedBox(height: 14.v),
               Text(
-                user!.email.toString().tr,
+                username.tr,
                 style: CustomTextStyles.headlineSmallGray90001,
               ),
               SizedBox(height: 21.v),
@@ -74,6 +88,17 @@ class _HomeProfileState extends State<HomeProfile> {
               _buildAutoLayoutHorizontal(
                 iconlyCurvedWallet: ImageConstant.imgIconlyCurvedWallet,
                 payments: "Buat Kontrakan".tr,
+                onPressed: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreatePage()),
+                  );
+                },
+              ),
+              SizedBox(height: 20.v),
+              _buildAutoLayoutHorizontal(
+                iconlyCurvedWallet: ImageConstant.imgIconlyCurvedWallet,
+                payments: "Aktivasi Kontrakan".tr,
                 onPressed: () async {},
               ),
               SizedBox(height: 20.v),
@@ -167,6 +192,7 @@ class _HomeProfileState extends State<HomeProfile> {
           imagePath: iconlyCurvedWallet,
           height: 28.adaptSize,
           width: 28.adaptSize,
+          onTap: onPressed,
         ),
         Padding(
           padding: EdgeInsets.only(
@@ -189,6 +215,7 @@ class _HomeProfileState extends State<HomeProfile> {
           height: 20.adaptSize,
           width: 20.adaptSize,
           margin: EdgeInsets.symmetric(vertical: 4.v),
+          onTap: onPressed,
         ),
       ],
     );

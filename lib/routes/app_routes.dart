@@ -11,8 +11,8 @@ class AppRoutes {
   static const String messagePage = '/message';
 
   static List<GetPage> pages = [
-    GetPage(name: homeProfile, page: () => HomeProfile()),
-    GetPage(name: homePage, page: () => HomePage()),
+    GetPage(name: homeProfile, page: () => const HomeProfile()),
+    GetPage(name: homePage, page: () => const HomePage()),
     // GetPage(name: explorePage, page: () => ExplorePage()),
     // GetPage(name: favoritesPage, page: () => FavoritesPage()),
     // GetPage(name: messagePage, page: () => MessagePage()),

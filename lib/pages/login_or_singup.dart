@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:projectkost/pages/login_page.dart';
-import 'package:projectkost/pages/sing_up_page.dart';
+import 'package:projectkost/pages/signin.dart';
+import 'package:projectkost/pages/singup.dart';
 
 class LoginAndSignUp extends StatefulWidget {
   const LoginAndSignUp({super.key});
@@ -21,7 +21,7 @@ class _LoginAndSignUpState extends State<LoginAndSignUp> {
   @override
   Widget build(BuildContext context) {
     if (isLogin) {
-      return LoginPage(
+      return SignIn(
         onPressed: tooglePage,
       );
     } else {

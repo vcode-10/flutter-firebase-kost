@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:projectkost/pages/auth_page.dart';
-import 'package:projectkost/pages/login_page.dart';
-import 'package:projectkost/pages/sing_up_page.dart';
 import 'firebase_options.dart';
 
 void main() async {

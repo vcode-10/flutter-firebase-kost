@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:projectkost/pages/auth_checker.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/core/utils/validation_functions.dart';
@@ -9,10 +13,9 @@ import 'package:projectkost/pages/home_profile.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_image.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle.dart';
 import 'package:projectkost/widgets/app_bar/custom_app_bar.dart';
-import 'package:projectkost/widgets/custom_drop_down.dart';
 import 'package:projectkost/widgets/custom_elevated_button.dart';
 import 'package:projectkost/widgets/custom_text_form_field.dart';
-import 'package:projectkost/presentation/light_fill_your_profile_blank_form_screen/controller/light_fill_your_profile_blank_form_controller.dart';
+import 'package:date_field/date_field.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -25,44 +28,35 @@ class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _dateOfBirthController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
+  DateTime? selectedDate;
+  File? file;
+  ImagePicker image = ImagePicker();
+  var urlImageProfile;
+  var urlImageProfileUpdate;
   final user = FirebaseAuth.instance.currentUser;
   final storageRef = FirebaseStorage.instance.ref();
-
-  String? earthRefUrl;
 
   @override
   void initState() {
     super.initState();
-    _fullNameController.text = '';
-    _emailController.text = '';
-    _nameController.text = '';
-    _phoneNumberController.text = '';
-    _dateOfBirthController.text = '';
-    readData();
+    userData();
   }
 
-  void readData() {
-    DatabaseReference usersRef =
-        FirebaseDatabase.instance.ref('users/${user?.uid}');
+  void userData() async {
+    DataSnapshot snapshot =
+        await FirebaseDatabase.instance.ref('users/${user?.uid}').get();
 
-    usersRef.onValue.listen((DatabaseEvent event) {
-      final data = event.snapshot.value;
-      print(data);
-      if (data != null && data is Map) {
-        // Set the URL of the image
-        setState(() {
-          _fullNameController.text = data['fullname'] ?? '';
-          _emailController.text = data['email'] ?? '';
-          _nameController.text = data['name'] ?? '';
-          _phoneNumberController.text = data['phoneNumber'] ?? '';
-          _dateOfBirthController.text = data['dateOfBirth'] ?? '';
-        });
-      } else {
-        print('No data found for the current user.');
-      }
+    Map dataUser = snapshot.value as Map;
+    String dateOfBirthString = dataUser['dateofbirth'] ?? '';
+    setState(() {
+      _emailController.text = dataUser['email'] ?? '';
+      _fullNameController.text = dataUser['username'] ?? '';
+      _nameController.text = dataUser['name'] ?? '';
+      _phoneNumberController.text = dataUser['phoneNumber'] ?? '';
+      selectedDate = DateTime.parse(dateOfBirthString);
+      urlImageProfile = dataUser['urlImageProfile'];
     });
   }
 
@@ -83,7 +77,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: 160.adaptSize,
                 child: Stack(alignment: Alignment.bottomRight, children: [
                   CustomImageView(
-                      imagePath: ImageConstant.imgEllipse160x160,
+                      imagePath:
+                          urlImageProfile ?? ImageConstant.imgEllipse160x160,
                       height: 160.adaptSize,
                       width: 160.adaptSize,
                       radius: BorderRadius.circular(80.h),
@@ -92,6 +87,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       imagePath: ImageConstant.imgEdit,
                       height: 40.adaptSize,
                       width: 40.adaptSize,
+                      onTap: () {
+                        getImage();
+                      },
                       alignment: Alignment.bottomRight)
                 ])),
             SizedBox(height: 24.v),
@@ -165,22 +163,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Section Widget
   Widget _buildDateOfBirth() {
-    return CustomTextFormField(
-      controller: _dateOfBirthController,
-      hintText: "Tanggal Lahir".tr,
-      hintStyle: theme.textTheme.bodyMedium!,
-      suffix: Container(
-        margin: EdgeInsets.fromLTRB(16.h, 12.v, 12.h, 12.v), // Adjust margin
-        child: CustomImageView(
-          imagePath: ImageConstant.imgIconlyCurvedCalendar,
-          height: 20.adaptSize,
-          width: 20.adaptSize,
-        ),
+    return DateTimeField(
+      onDateSelected: (DateTime value) {
+        setState(() {
+          selectedDate = value;
+        });
+      },
+      selectedDate: selectedDate,
+      mode: DateTimeFieldPickerMode.date,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+      decoration: const InputDecoration(
+        labelText: 'Tanggal Lahir',
       ),
-      suffixConstraints: BoxConstraints(maxHeight: 56.v),
-      contentPadding: EdgeInsets.only(left: 20.h, top: 19.v, bottom: 19.v),
-      borderDecoration: TextFormFieldStyleHelper.fillGray,
-      fillColor: appTheme.gray50,
     );
   }
 
@@ -215,12 +211,6 @@ class _ProfilePageState extends State<ProfilePage> {
         controller: _phoneNumberController,
         hintText: "Nomor Handphone".tr,
         hintStyle: theme.textTheme.bodyMedium!,
-        validator: (value) {
-          if (!isText(value)) {
-            return "err_msg_please_enter_valid_text".tr;
-          }
-          return null;
-        },
         borderDecoration: TextFormFieldStyleHelper.fillGray,
         fillColor: appTheme.gray50);
   }
@@ -230,11 +220,73 @@ class _ProfilePageState extends State<ProfilePage> {
     return CustomElevatedButton(
         text: "Simpan".tr,
         margin: EdgeInsets.only(left: 24.h, right: 24.h, bottom: 48.v),
+        onPressed: () {
+          uploadData();
+        },
         buttonStyle: CustomButtonStyles.fillBlue);
   }
 
-  /// Navigates to the previous screen.
-  onTapArrowLeft() {
-    Get.back();
+  getImage() async {
+    var img = await image.pickImage(source: ImageSource.gallery);
+    setState(() {
+      file = File(img!.path);
+    });
+
+    try {
+      var imagefile = FirebaseStorage.instance
+          .ref()
+          .child("users_photo")
+          .child("/${_emailController.text}.jpg");
+      UploadTask task = imagefile.putFile(file!);
+      TaskSnapshot snapshot = await task;
+      urlImageProfileUpdate = await snapshot.ref.getDownloadURL();
+      setState(() {
+        urlImageProfileUpdate = urlImageProfileUpdate;
+      });
+      if (urlImageProfileUpdate != null) {
+        Map<String, String> userArray = {
+          'urlImageProfile': urlImageProfileUpdate,
+        };
+        FirebaseDatabase.instance
+            .ref()
+            .child('users/${user?.uid}')
+            .update(userArray)
+            .whenComplete(() {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ProfilePage(),
+            ),
+          );
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  uploadData() async {
+    try {
+      Map<String, String> userArray = {
+        'name': _nameController.text,
+        'phoneNumber': _phoneNumberController.text,
+        'dateofbirth': DateFormat('yyyy-MM-dd').format(selectedDate!),
+      };
+
+      FirebaseDatabase.instance
+          .ref()
+          .child('users/${user?.uid}')
+          .update(userArray)
+          .whenComplete(() {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ProfilePage(),
+          ),
+        );
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:projectkost/pages/home_profile.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_image.dart';
@@ -21,12 +22,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final user = FirebaseAuth.instance.currentUser;
-
   final TextEditingController _searchController = TextEditingController();
+  final user = FirebaseAuth.instance.currentUser;
+  String username = '';
+  var urlImageProfile;
 
   LightHomeFullController controller =
       Get.put(LightHomeFullController(LightHomeFullModel().obs));
+
+  @override
+  void initState() {
+    super.initState();
+    userData();
+  }
+
+  void userData() async {
+    DataSnapshot snapshot =
+        await FirebaseDatabase.instance.ref('users/${user?.uid}').get();
+
+    Map dataUser = snapshot.value as Map;
+    setState(() {
+      username = dataUser['username'].toString();
+      urlImageProfile = dataUser['urlImageProfile'];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +114,7 @@ class _HomePageState extends State<HomePage> {
     return CustomAppBar(
       leadingWidth: 72.h,
       leading: AppbarLeadingImage(
-        imagePath: ImageConstant.imgProfile,
+        imagePath: urlImageProfile ?? ImageConstant.imgEllipse160x160,
         margin: EdgeInsets.only(
           left: 24.h,
           top: 2.v,
@@ -107,12 +126,12 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             AppbarSubtitleFour(
-              text: "Hallo,".tr,
+              text: "Selamat datang!,".tr,
               margin: EdgeInsets.only(right: 21.h),
             ),
             SizedBox(height: 8.v),
             AppbarSubtitleTwo(
-              text: user!.email.toString().tr,
+              text: username.tr,
             ),
           ],
         ),
@@ -211,7 +230,7 @@ class _HomePageState extends State<HomePage> {
       case AppRoutes.homeProfile:
         return const HomeProfile();
       default:
-        return DefaultWidget();
+        return const HomePage();
     }
   }
 }
