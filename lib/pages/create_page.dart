@@ -1,6 +1,11 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:projectkost/core/utils/validation_functions.dart';
 import 'package:projectkost/pages/auth_checker.dart';
 import 'package:projectkost/core/app_export.dart';
@@ -23,6 +28,14 @@ class CreatePage extends StatefulWidget {
 
 class _CreatePageState extends State<CreatePage> {
   final user = FirebaseAuth.instance.currentUser;
+  DatabaseReference? _databaseReference;
+
+  @override
+  void initState() {
+    super.initState();
+    _databaseReference = FirebaseDatabase.instance.ref().child("properties");
+  }
+
   final TextEditingController nameKontrakan = TextEditingController();
   final TextEditingController tipeKamar = TextEditingController();
   final TextEditingController tentangKontrakan = TextEditingController();
@@ -31,7 +44,20 @@ class _CreatePageState extends State<CreatePage> {
   final TextEditingController kabupatenKontrakan = TextEditingController();
   final TextEditingController kacamatanKontrakan = TextEditingController();
   final TextEditingController kelurahanKontrakan = TextEditingController();
+  var urlRuangTengah;
+  var urlKamarMandi;
+  var urlFotoDepan;
+  var urlThumbnail;
   var disewakan;
+  var urlKamar;
+  var urlDapur;
+  File? imageRuangTengah;
+  File? imageKamarMandi;
+  File? imageThumbnail;
+  File? imageDepan;
+  File? imageDapur;
+  File? imageKamar;
+  ImagePicker image = ImagePicker();
   bool status = false;
   bool isCheckedAC = false;
   bool isCheckedCCTV = false;
@@ -93,15 +119,20 @@ class _CreatePageState extends State<CreatePage> {
                       SizedBox(height: 24.v),
                       //Disewa untuk Wanita,Pria, dan Campur
                       CustomDropDown(
-                          hintText: 'Disewakan',
-                          hintStyle: theme.textTheme.bodyMedium,
-                          prefix: const Icon(Icons.arrow_drop_down),
-                          items: [
-                            SelectionPopupModel(title: 'Laki - Laki'),
-                            SelectionPopupModel(title: 'Perempuan'),
-                            SelectionPopupModel(title: 'Campur'),
-                          ],
-                          onChanged: (val) => disewakan = val),
+                        hintText: 'Disewakan',
+                        hintStyle: theme.textTheme.bodyMedium,
+                        prefix: const Icon(Icons.arrow_drop_down),
+                        items: [
+                          SelectionPopupModel(title: 'Laki - Laki'),
+                          SelectionPopupModel(title: 'Perempuan'),
+                          SelectionPopupModel(title: 'Campur'),
+                        ],
+                        onChanged: (val) {
+                          // Access the title property of SelectionPopupModel
+                          disewakan = val?.title ??
+                              ''; // Jika val null, berikan nilai default (misal: '')
+                        },
+                      ),
                       SizedBox(height: 24.v),
                       CustomTextFormField(
                           controller: tentangKontrakan,
@@ -326,11 +357,13 @@ class _CreatePageState extends State<CreatePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _buildAutoLayoutVertical(
-                                    gallery: "Thumbnail".tr),
+                                    gallery: "Thumbnail".tr,
+                                    onTap: getThumbnail),
                                 _buildAutoLayoutVertical(
-                                    gallery: "Foto Depan".tr),
+                                    gallery: "Foto Depan".tr, onTap: getDepan),
                                 _buildAutoLayoutVertical(
-                                    gallery: "Foto Ruang Tengah".tr),
+                                    gallery: "Foto Ruang Tengah".tr,
+                                    onTap: getRuangTengah),
                               ])),
                       SizedBox(height: 24.v),
                       Padding(
@@ -339,11 +372,12 @@ class _CreatePageState extends State<CreatePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _buildAutoLayoutVertical(
-                                    gallery: "Foto Kamar".tr),
+                                    gallery: "Foto Kamar".tr, onTap: getKamar),
                                 _buildAutoLayoutVertical(
-                                    gallery: "Foto Dapur".tr),
+                                    gallery: "Foto Dapur".tr, onTap: getDapur),
                                 _buildAutoLayoutVertical(
-                                    gallery: "Foto Kamar Mandi".tr),
+                                    gallery: "Foto Kamar Mandi".tr,
+                                    onTap: getKamarMandi),
                               ])),
                       SizedBox(height: 24.v),
                       _buildContinue(),
@@ -362,7 +396,7 @@ class _CreatePageState extends State<CreatePage> {
         text: "Buat".tr,
         margin: EdgeInsets.only(left: 24.h, right: 24.h, bottom: 48.v),
         onPressed: () {
-          // uploadData();
+          uploadData();
         },
         buttonStyle: CustomButtonStyles.fillBlue);
   }
@@ -386,13 +420,15 @@ class _CreatePageState extends State<CreatePage> {
             text: "Buat Kontrakan".tr, margin: EdgeInsets.only(left: 16.h)));
   }
 
-  Widget _buildAutoLayoutVertical({required String gallery}) {
+  Widget _buildAutoLayoutVertical(
+      {required String gallery, required VoidCallback? onTap}) {
     return Column(children: [
       CustomIconButton(
           height: 72.adaptSize,
           width: 72.adaptSize,
           padding: EdgeInsets.all(20.h),
           decoration: IconButtonStyleHelper.outlineGray,
+          onTap: onTap != null ? () => onTap() : null,
           child: CustomImageView(
               imagePath: ImageConstant.imgAutoLayoutHorizontal56x56)),
       SizedBox(height: 11.v),
@@ -402,61 +438,149 @@ class _CreatePageState extends State<CreatePage> {
     ]);
   }
 
+  getThumbnail() async {
+    var img = await image.pickImage(source: ImageSource.gallery);
+    setState(() {
+      imageThumbnail = File(img!.path);
+    });
+  }
+
+  getDapur() async {
+    var img = await image.pickImage(source: ImageSource.gallery);
+    setState(() {
+      imageDapur = File(img!.path);
+    });
+  }
+
+  getDepan() async {
+    var img = await image.pickImage(source: ImageSource.gallery);
+    setState(() {
+      imageDepan = File(img!.path);
+    });
+  }
+
+  getKamarMandi() async {
+    var img = await image.pickImage(source: ImageSource.gallery);
+    setState(() {
+      imageKamarMandi = File(img!.path);
+    });
+  }
+
+  getRuangTengah() async {
+    var img = await image.pickImage(source: ImageSource.gallery);
+    setState(() {
+      imageRuangTengah = File(img!.path);
+    });
+  }
+
+  getKamar() async {
+    var img = await image.pickImage(source: ImageSource.gallery);
+    setState(() {
+      imageKamar = File(img!.path);
+    });
+  }
+
+  String generateRandomFileName() {
+    final random = Random();
+    final randomNumber = random.nextInt(1000000); // Ubah sesuai kebutuhan
+    return 'random_$randomNumber.jpg';
+  }
+
+  Future<String> uploadImage(File? imageFile) async {
+    final randomFileName = generateRandomFileName();
+    var imageStorageRef =
+        FirebaseStorage.instance.ref().child("property").child(randomFileName);
+    UploadTask uploadTask = imageStorageRef.putFile(imageFile!);
+    TaskSnapshot snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
+  }
+
   uploadData() async {
     try {
-      // Upload property data
-      Map<String, String> dataKontrakan = {
-        'userId': '${user?.uid}',
-        'namaKontrakan': nameKontrakan.text,
-        'tipeKontrakan': tipeKamar.text,
-        'disewakan': disewakan.toString(),
-        'tentangKontrakan': tentangKontrakan.text,
-        'hargaPerBulan': pricePerMonth.text,
-        'kabupaten': kabupatenKontrakan.text,
-        'kacamatan': kacamatanKontrakan.text,
-        'kelurahan': kelurahanKontrakan.text,
-        'alamat': alamatKontrakan.text,
-        'status': status.toString(),
-      };
+      urlThumbnail = await uploadImage(imageThumbnail);
+      urlFotoDepan = await uploadImage(
+        imageDepan,
+      );
 
-      DatabaseReference propertyRef =
-          FirebaseDatabase.instance.ref().child('property');
-      DatabaseReference propertyKey = propertyRef.push();
-      propertyKey.set(dataKontrakan);
+      urlDapur = await uploadImage(imageDapur);
+      urlKamarMandi = await uploadImage(imageKamarMandi);
+      urlRuangTengah = await uploadImage(imageRuangTengah);
+      urlKamar = await uploadImage(imageKamar);
 
-      // Get the generated property ID
-      String propertyID = propertyKey.key ?? '';
+      setState(() {
+        urlRuangTengah = urlRuangTengah;
+        urlKamarMandi = urlKamarMandi;
+        urlThumbnail = urlThumbnail;
+        urlFotoDepan = urlFotoDepan;
+        urlDapur = urlDapur;
+        urlKamar = urlKamar;
+      });
 
-      // Upload facility data
-      Map<String, String> fasilitasKontrakan = {
-        'propertyID': propertyID,
-        'AC': isCheckedAC ? 'AC' : '',
-        'CCTV': isCheckedCCTV ? 'CCTV' : '',
-        'Dispenser': isCheckedDispenser ? 'Dispenser' : '',
-        'KamarMandiDalam':
-            isCheckedKamarMandiDalam ? 'Kamar Mandi (Didalam)' : '',
-        'KamarMandiLuar': isCheckedKamarMandiLuar ? 'Kamar Mandi (Diluar)' : '',
-        'Kasur': isCheckedKasur ? 'Kasur' : '',
-        'Lemari': isCheckedLemari ? 'Lemari' : '',
-        'Parkir': isCheckedParkir ? 'Parkir' : '',
-      };
+      if (urlThumbnail != null) {
+        Map<String, String> dataKontrakan = {
+          'userId': '${user?.uid}',
+          'namaKontrakan': nameKontrakan.text,
+          'tipeKontrakan': tipeKamar.text,
+          'disewakan': disewakan.toString(),
+          'tentangKontrakan': tentangKontrakan.text,
+          'hargaPerBulan': pricePerMonth.text,
+          'kabupaten': kabupatenKontrakan.text,
+          'kacamatan': kacamatanKontrakan.text,
+          'kelurahan': kelurahanKontrakan.text,
+          'alamat': alamatKontrakan.text,
+          'status': 'false',
+          'urlRuangTengah': urlRuangTengah,
+          'urlKamarMandi': urlKamarMandi,
+          'urlThumbnail': urlThumbnail,
+          'urlFotoDepan': urlFotoDepan,
+          'urlDapur': urlDapur,
+          'urlKamar': urlKamar,
+        };
 
-      DatabaseReference facilityRef =
-          FirebaseDatabase.instance.ref().child('facility');
-      facilityRef.push().set(fasilitasKontrakan);
+        DatabaseReference newPropertyRef = _databaseReference!.push();
 
-      // Upload regulation data
-      Map<String, String> regulasiKontrakan = {
-        'propertyID': propertyID,
-        'akses24': isChecked24Jam ? 'Akses 24 Jam' : '',
-        'pasutri': isCheckedPasutri ? 'Boleh Pasutri' : '',
-        'hewan': isCheckedHewan ? 'Boleh bawa hewan' : '',
-        'rokok': isCheckedRokok ? 'Dilarang Merokok di kamar' : '',
-      };
+        newPropertyRef.set(dataKontrakan);
 
-      DatabaseReference regulationRef =
-          FirebaseDatabase.instance.ref().child('regulation');
-      regulationRef.push().set(regulasiKontrakan);
+        String propertyID = newPropertyRef.key ?? '';
+
+        Map<String, String> fasilitasKontrakan = {
+          'propertyID': propertyID,
+          if (isCheckedAC) 'AC': 'AC',
+          if (isCheckedCCTV) 'CCTV': 'CCTV',
+          if (isCheckedDispenser) 'Dispenser': 'Dispenser',
+          if (isCheckedKamarMandiDalam)
+            'KamarMandiDalam': 'Kamar Mandi (Didalam)',
+          if (isCheckedKamarMandiLuar) 'KamarMandiLuar': 'Kamar Mandi (Diluar)',
+          if (isCheckedKasur) 'Kasur': 'Kasur',
+          if (isCheckedLemari) 'Lemari': 'Lemari',
+          if (isCheckedParkir) 'Parkir': 'Parkir',
+        };
+
+        DatabaseReference facilityRef =
+            FirebaseDatabase.instance.ref().child('facilities');
+
+        facilityRef.push().set(fasilitasKontrakan);
+
+        Map<String, String> regulasiKontrakan = {
+          'propertyID': propertyID,
+          if (isChecked24Jam) 'Akses24Jam': 'Akses 24 Jam',
+          if (isCheckedPasutri) 'Pasutri': 'Boleh Pasutri',
+          if (isCheckedHewan) 'Hewan': 'Boleh bawa hewan',
+          if (isCheckedRokok) 'Rokok': 'Dilarang Merokok di kamar',
+        };
+
+        DatabaseReference regulationRef =
+            FirebaseDatabase.instance.ref().child('regulation');
+
+        regulationRef.push().set(regulasiKontrakan).whenComplete(() {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const HomeProfile(),
+            ),
+          );
+        });
+      }
     } catch (e) {
       print(e);
     }

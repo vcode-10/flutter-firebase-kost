@@ -1,8 +1,10 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:projectkost/core/app_export.dart';
+import 'package:projectkost/pages/active_property.dart';
 import 'package:projectkost/pages/auth_checker.dart';
 import 'package:projectkost/pages/create_page.dart';
+import 'package:projectkost/pages/home_property.dart';
 import 'package:projectkost/pages/profile_page.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_circleimage.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle.dart';
@@ -82,7 +84,13 @@ class _HomeProfileState extends State<HomeProfile> {
                 iconlyCurvedWallet:
                     ImageConstant.imgIconlyCurvedCalendarGray90001,
                 payments: "Kontrakan Saya".tr,
-                onPressed: () async {},
+                onPressed: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const HomeProperty()),
+                  );
+                },
               ),
               SizedBox(height: 20.v),
               _buildAutoLayoutHorizontal(
@@ -99,7 +107,13 @@ class _HomeProfileState extends State<HomeProfile> {
               _buildAutoLayoutHorizontal(
                 iconlyCurvedWallet: ImageConstant.imgIconlyCurvedWallet,
                 payments: "Aktivasi Kontrakan".tr,
-                onPressed: () async {},
+                onPressed: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ActiveProperty()),
+                  );
+                },
               ),
               SizedBox(height: 20.v),
               const Divider(),

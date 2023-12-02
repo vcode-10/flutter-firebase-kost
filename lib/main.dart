@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:projectkost/pages/auth_page.dart';
+import 'package:projectkost/pages/property_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(),
-      home: const AuthPage(),
+      home: const PropertyPage(),
     );
   }
 }
