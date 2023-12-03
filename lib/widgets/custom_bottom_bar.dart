@@ -17,8 +17,8 @@ class CustomBottomBar extends StatelessWidget {
     BottomMenuModel(
       icon: ImageConstant.imgNavExplore,
       activeIcon: ImageConstant.imgNavExplore,
-      title: "lbl_explore".tr,
-      type: BottomBarEnum.Explore,
+      title: "Search".tr,
+      type: BottomBarEnum.Search,
     ),
     // BottomMenuModel(
     //   icon: ImageConstant.imgNavFavoritesGray500,
@@ -125,7 +125,7 @@ class CustomBottomBar extends StatelessWidget {
 
 enum BottomBarEnum {
   Home,
-  Explore,
+  Search,
   // Favorites,
   // Message,
   Profile,

@@ -519,15 +519,15 @@ class _CreatePageState extends State<CreatePage> {
       if (urlThumbnail != null) {
         Map<String, String> dataKontrakan = {
           'userId': '${user?.uid}',
-          'namaKontrakan': nameKontrakan.text,
+          'namaKontrakan': nameKontrakan.text.toLowerCase(),
           'tipeKontrakan': tipeKamar.text,
           'disewakan': disewakan.toString(),
           'tentangKontrakan': tentangKontrakan.text,
           'hargaPerBulan': pricePerMonth.text,
-          'kabupaten': kabupatenKontrakan.text,
-          'kacamatan': kacamatanKontrakan.text,
-          'kelurahan': kelurahanKontrakan.text,
-          'alamat': alamatKontrakan.text,
+          'kabupaten': kabupatenKontrakan.text.toLowerCase(),
+          'kacamatan': kacamatanKontrakan.text.toLowerCase(),
+          'kelurahan': kelurahanKontrakan.text.toLowerCase(),
+          'alamat': alamatKontrakan.text.toLowerCase(),
           'status': 'false',
           'urlRuangTengah': urlRuangTengah,
           'urlKamarMandi': urlKamarMandi,
@@ -535,6 +535,8 @@ class _CreatePageState extends State<CreatePage> {
           'urlFotoDepan': urlFotoDepan,
           'urlDapur': urlDapur,
           'urlKamar': urlKamar,
+          'searchField':
+              '${nameKontrakan.text.toLowerCase()}_${kabupatenKontrakan.text.toLowerCase()}_${kacamatanKontrakan.text.toLowerCase()}_${kelurahanKontrakan.text.toLowerCase()}_${alamatKontrakan.text.toLowerCase()}',
         };
 
         DatabaseReference newPropertyRef = _databaseReference!.push();
@@ -544,7 +546,6 @@ class _CreatePageState extends State<CreatePage> {
         String propertyID = newPropertyRef.key ?? '';
 
         Map<String, String> fasilitasKontrakan = {
-          'propertyID': propertyID,
           if (isCheckedAC) 'AC': 'AC',
           if (isCheckedCCTV) 'CCTV': 'CCTV',
           if (isCheckedDispenser) 'Dispenser': 'Dispenser',
@@ -559,10 +560,9 @@ class _CreatePageState extends State<CreatePage> {
         DatabaseReference facilityRef =
             FirebaseDatabase.instance.ref().child('facilities');
 
-        facilityRef.push().set(fasilitasKontrakan);
+        facilityRef.child(propertyID).set(fasilitasKontrakan);
 
         Map<String, String> regulasiKontrakan = {
-          'propertyID': propertyID,
           if (isChecked24Jam) 'Akses24Jam': 'Akses 24 Jam',
           if (isCheckedPasutri) 'Pasutri': 'Boleh Pasutri',
           if (isCheckedHewan) 'Hewan': 'Boleh bawa hewan',
@@ -572,7 +572,7 @@ class _CreatePageState extends State<CreatePage> {
         DatabaseReference regulationRef =
             FirebaseDatabase.instance.ref().child('regulation');
 
-        regulationRef.push().set(regulasiKontrakan).whenComplete(() {
+        regulationRef.child(propertyID).set(regulasiKontrakan).whenComplete(() {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

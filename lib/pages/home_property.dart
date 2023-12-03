@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/pages/auth_checker.dart';
 import 'package:projectkost/pages/home_profile.dart';
+import 'package:projectkost/pages/property_page.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_image.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle.dart';
 import 'package:projectkost/widgets/app_bar/custom_app_bar.dart';
@@ -33,15 +34,15 @@ class _HomePropertyState extends State<HomeProperty> {
               dataArray['key'] = snapshot.key;
               return GestureDetector(
                 onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) => UpdateRecord(
-                  //       dataArray_Key: dataArray['key'],
-                  //     ),
-                  //   ),
-                  // );
-                  // print(dataArray['urlThumbnail']);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PropertyPage(
+                        property_key: dataArray['key'],
+                      ),
+                    ),
+                  );
+                  print(dataArray['urlThumbnail']);
                 },
                 child: Container(
                   padding: EdgeInsets.all(14.h),

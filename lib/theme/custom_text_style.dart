@@ -147,6 +147,9 @@ class CustomTextStyles {
         color: theme.colorScheme.primary,
         fontWeight: FontWeight.w600,
       );
+  static get labelLargePrimarySemiBold => theme.textTheme.labelLarge!.copyWith(
+        color: theme.colorScheme.primary,
+      );
   static get labelMediumWhiteA700 => theme.textTheme.labelMedium!.copyWith(
         color: appTheme.whiteA700,
       );

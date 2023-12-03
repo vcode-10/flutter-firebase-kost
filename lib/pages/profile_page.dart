@@ -55,8 +55,13 @@ class _ProfilePageState extends State<ProfilePage> {
       _fullNameController.text = dataUser['username'] ?? '';
       _nameController.text = dataUser['name'] ?? '';
       _phoneNumberController.text = dataUser['phoneNumber'] ?? '';
-      selectedDate = DateTime.parse(dateOfBirthString);
-      urlImageProfile = dataUser['urlImageProfile'];
+      if (dateOfBirthString.isNotEmpty) {
+        selectedDate = DateTime.parse(dateOfBirthString);
+      } else {
+        selectedDate = DateTime.now();
+      }
+      urlImageProfile =
+          dataUser['urlImageProfile'] ?? ImageConstant.imgEllipse160x160;
     });
   }
 

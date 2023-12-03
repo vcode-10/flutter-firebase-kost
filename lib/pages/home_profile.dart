@@ -6,6 +6,7 @@ import 'package:projectkost/pages/auth_checker.dart';
 import 'package:projectkost/pages/create_page.dart';
 import 'package:projectkost/pages/home_property.dart';
 import 'package:projectkost/pages/profile_page.dart';
+import 'package:projectkost/pages/search_page.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_circleimage.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle.dart';
 import 'package:projectkost/widgets/app_bar/appbar_trailing_image.dart';
@@ -258,8 +259,8 @@ class _HomeProfileState extends State<HomeProfile> {
     switch (type) {
       case BottomBarEnum.Home:
         return AppRoutes.homePage;
-      case BottomBarEnum.Explore:
-        return AppRoutes.explorePage;
+      case BottomBarEnum.Search:
+        return AppRoutes.searchPage;
       case BottomBarEnum.Profile:
         return AppRoutes.homeProfile;
       default:
@@ -271,8 +272,8 @@ class _HomeProfileState extends State<HomeProfile> {
     switch (currentRoute) {
       case AppRoutes.homePage:
         return const HomePage();
-      case AppRoutes.explorePage:
-      // return ExplorePage();
+      case AppRoutes.searchPage:
+        return const SearchPage();
       case AppRoutes.homeProfile:
         return const HomeProfile();
       default:

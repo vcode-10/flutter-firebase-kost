@@ -9,11 +9,13 @@ class AppbarTitleEdittextOne extends StatelessWidget {
     this.hintText,
     this.controller,
     this.margin,
+    this.onSearchSubmitted,
   }) : super(
           key: key,
         );
 
   String? hintText;
+  VoidCallback? onSearchSubmitted;
 
   TextEditingController? controller;
 
@@ -26,7 +28,7 @@ class AppbarTitleEdittextOne extends StatelessWidget {
       child: CustomTextFormField(
         width: 336.h,
         controller: controller,
-        hintText: "lbl_abcdefghijk2".tr,
+        hintText: "Search".tr,
         prefix: Container(
           margin: EdgeInsets.fromLTRB(20.h, 18.v, 12.h, 18.v),
           child: CustomImageView(

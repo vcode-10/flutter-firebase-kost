@@ -116,6 +116,14 @@ class CustomButtonStyles {
         shadowColor: theme.colorScheme.primary.withOpacity(0.25),
         elevation: 8,
       );
+  static ButtonStyle get outlineSuccess => ElevatedButton.styleFrom(
+        backgroundColor: Colors.green,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(29.h),
+        ),
+        shadowColor: theme.colorScheme.primary.withOpacity(0.25),
+        elevation: 8,
+      );
   static ButtonStyle get outlinePrimaryTL161 => OutlinedButton.styleFrom(
         backgroundColor: theme.colorScheme.primary.withOpacity(0.08),
         side: BorderSide(

@@ -1,18 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:projectkost/pages/home_profile.dart';
+import 'package:projectkost/pages/property_page.dart';
+import 'package:projectkost/pages/search_page.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_image.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle_four.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle_two.dart';
 import 'package:projectkost/widgets/app_bar/custom_app_bar.dart';
 import 'package:projectkost/widgets/custom_bottom_bar.dart';
-import 'package:projectkost/widgets/custom_search_view.dart';
 import 'package:projectkost/core/app_export.dart';
-import 'package:projectkost/presentation/light_home_full_page/widgets/realestatecard_item_widget.dart';
-import 'package:projectkost/presentation/light_home_full_page/controller/light_home_full_controller.dart';
-import 'package:projectkost/presentation/light_home_full_page/models/light_home_full_model.dart';
-import 'package:projectkost/presentation/light_home_full_page/models/realestatecard_item_model.dart';
+import 'package:projectkost/widgets/custom_elevated_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,18 +21,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final TextEditingController _searchController = TextEditingController();
   final user = FirebaseAuth.instance.currentUser;
   String username = '';
   var urlImageProfile;
-
-  LightHomeFullController controller =
-      Get.put(LightHomeFullController(LightHomeFullModel().obs));
+  DatabaseReference propertiesRef =
+      FirebaseDatabase.instance.reference().child('properties');
+  List<Map<dynamic, dynamic>> propertiesList = [];
 
   @override
   void initState() {
     super.initState();
     userData();
+    propertyData();
   }
 
   void userData() async {
@@ -44,6 +43,34 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       username = dataUser['username'].toString();
       urlImageProfile = dataUser['urlImageProfile'];
+    });
+  }
+
+  void propertyData() async {
+    propertiesRef
+        .orderByChild('status')
+        .equalTo('true')
+        .onValue
+        .listen((event) {
+      if (mounted) {
+        setState(() {
+          propertiesList.clear(); // Clear the previous data
+
+          // Loop through the snapshot to get all properties
+          if (event.snapshot.value is Map) {
+            (event.snapshot.value as Map).forEach((key, value) {
+              // Assuming each property is stored as a Map
+              Map property = value;
+
+              // Add the key to the property map
+              property['key'] = key;
+
+              // Add the property to the list
+              propertiesList.add(property);
+            });
+          }
+        });
+      }
     });
   }
 
@@ -58,23 +85,25 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: [
               SizedBox(height: 20.v),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.h),
-                        child: CustomSearchView(
-                          controller: _searchController,
-                          hintText: "Search".tr,
-                        ),
-                      ),
-                      SizedBox(height: 24.v),
-                      _buildRealEstateCard(),
-                    ],
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.h),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    mainAxisExtent: 275.v,
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16.h,
+                    crossAxisSpacing: 16.h,
                   ),
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: propertiesList.length,
+                  itemBuilder: (context, index) {
+                    return buildPropertyCard(
+                      propertiesList[index],
+                    );
+                  },
                 ),
-              ),
+              )
             ],
           ),
         ),
@@ -83,28 +112,98 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildRealEstateCard() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.h),
-      child: Obx(
-        () => GridView.builder(
-          shrinkWrap: true,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            mainAxisExtent: 275.v,
-            crossAxisCount: 2,
-            mainAxisSpacing: 16.h,
-            crossAxisSpacing: 16.h,
+  Widget buildPropertyCard(Map property) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PropertyPage(
+              property_key: property['key'] ?? '',
+            ),
           ),
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: controller
-              .lightHomeFullModelObj.value.realestatecardItemList.value.length,
-          itemBuilder: (context, index) {
-            RealestatecardItemModel model = controller.lightHomeFullModelObj
-                .value.realestatecardItemList.value[index];
-            return RealestatecardItemWidget(
-              model,
-            );
-          },
+        );
+        print(property['urlThumbnail']);
+      },
+      child: Container(
+        padding: EdgeInsets.all(14.h),
+        decoration: AppDecoration.outlineOnErrorContainer.copyWith(
+          borderRadius: BorderRadiusStyle.circleBorder28,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 154.adaptSize,
+              width: 154.adaptSize,
+              child: Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  CustomImageView(
+                    imagePath: urlImageProfile,
+                    height: 154.adaptSize,
+                    width: 154.adaptSize,
+                    radius: BorderRadius.circular(
+                      20.h,
+                    ),
+                    alignment: Alignment.center,
+                  ),
+                  CustomElevatedButton(
+                    height: 22.v,
+                    width: 100.h,
+                    text: property['disewakan'] ?? '',
+                    margin: EdgeInsets.only(
+                      top: 12.v,
+                      right: 12.h,
+                    ),
+                    buttonTextStyle: theme.textTheme.labelMedium!,
+                    alignment: Alignment.topRight,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 11.v),
+            Text(
+              property['namaKontrakan'],
+              style: CustomTextStyles.titleMediumGray9000118_1,
+            ),
+            SizedBox(height: 12.v),
+            Text(
+              property['kabupaten'],
+              style: CustomTextStyles.labelMediumGray700,
+            ),
+            SizedBox(height: 8.v),
+            Row(
+              children: [
+                Text(
+                  'Rp. ${property['hargaPerBulan']}',
+                  style: CustomTextStyles.titleLargePrimary,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: 4.h,
+                    top: 10.v,
+                    bottom: 2.v,
+                  ),
+                  child: Text(
+                    '/ Malam',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+                CustomImageView(
+                  imagePath: ImageConstant.imgIconlyLightOutlineHeart,
+                  height: 20.adaptSize,
+                  width: 20.adaptSize,
+                  margin: EdgeInsets.only(
+                    left: 67.h,
+                    bottom: 2.v,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -131,7 +230,7 @@ class _HomePageState extends State<HomePage> {
             ),
             SizedBox(height: 8.v),
             AppbarSubtitleTwo(
-              text: username.tr,
+              text: username ?? '',
             ),
           ],
         ),
@@ -212,8 +311,8 @@ class _HomePageState extends State<HomePage> {
     switch (type) {
       case BottomBarEnum.Home:
         return AppRoutes.homePage;
-      case BottomBarEnum.Explore:
-        return AppRoutes.explorePage;
+      case BottomBarEnum.Search:
+        return AppRoutes.searchPage;
       case BottomBarEnum.Profile:
         return AppRoutes.homeProfile;
       default:
@@ -225,8 +324,8 @@ class _HomePageState extends State<HomePage> {
     switch (currentRoute) {
       case AppRoutes.homePage:
         return const HomePage();
-      case AppRoutes.explorePage:
-      // return ExplorePage();
+      case AppRoutes.searchPage:
+        return const SearchPage();
       case AppRoutes.homeProfile:
         return const HomeProfile();
       default:

@@ -3,6 +3,7 @@ import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/pages/auth_checker.dart';
+import 'package:projectkost/pages/home_page.dart';
 import 'package:projectkost/pages/home_profile.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_image.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle.dart';
@@ -31,6 +32,7 @@ class _ActivePropertyState extends State<ActiveProperty> {
             itemBuilder: (context, snapshot, animation, index) {
               Map dataArray = snapshot.value as Map;
               dataArray['key'] = snapshot.key;
+              print(dataArray);
               return GestureDetector(
                 onTap: () {
                   // Navigator.push(
@@ -179,12 +181,7 @@ class _ActivePropertyState extends State<ActiveProperty> {
         .child('properties/${key}')
         .update(property)
         .whenComplete(() {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const ActiveProperty(),
-        ),
-      );
+      return AppRoutes.activityPage;
     });
   }
 }

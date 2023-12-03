@@ -15,23 +15,29 @@ class LightSearchResultsListScreen
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
     return SafeArea(
-        child: Scaffold(
-            appBar: _buildAppBar(),
-            body: SizedBox(
-                width: mediaQueryData.size.width,
-                child: SingleChildScrollView(
-                    padding: EdgeInsets.only(top: 24.v),
-                    child: Padding(
-                        padding: EdgeInsets.only(left: 24.h),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildAll(),
-                              SizedBox(height: 23.v),
-                              _buildAutoLayoutHorizontal(),
-                              SizedBox(height: 24.v),
-                              _buildLuckyLakeApartments()
-                            ]))))));
+      child: Scaffold(
+        appBar: _buildAppBar(),
+        body: SizedBox(
+          width: mediaQueryData.size.width,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(top: 24.v),
+            child: Padding(
+              padding: EdgeInsets.only(left: 24.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildAll(),
+                  SizedBox(height: 23.v),
+                  _buildAutoLayoutHorizontal(),
+                  SizedBox(height: 24.v),
+                  _buildLuckyLakeApartments()
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   /// Section Widget
