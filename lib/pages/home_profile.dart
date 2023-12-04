@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/pages/active_property.dart';
 import 'package:projectkost/pages/auth_checker.dart';
+import 'package:projectkost/pages/auth_page.dart';
 import 'package:projectkost/pages/create_page.dart';
 import 'package:projectkost/pages/home_property.dart';
 import 'package:projectkost/pages/profile_page.dart';
@@ -24,6 +25,7 @@ class HomeProfile extends StatefulWidget {
 class _HomeProfileState extends State<HomeProfile> {
   final user = FirebaseAuth.instance.currentUser;
   String username = '';
+  String role = '';
   var urlImageProfile;
 
   @override
@@ -38,7 +40,14 @@ class _HomeProfileState extends State<HomeProfile> {
 
     Map dataUser = snapshot.value as Map;
     setState(() {
-      username = dataUser['username'].toString();
+      username = dataUser['username']
+          .toString()
+          .split(' ')
+          .map((word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '')
+          .join(' ');
+      role = dataUser['role'].toString();
       urlImageProfile = dataUser['urlImageProfile'];
     });
   }
@@ -105,17 +114,7 @@ class _HomeProfileState extends State<HomeProfile> {
                 },
               ),
               SizedBox(height: 20.v),
-              _buildAutoLayoutHorizontal(
-                iconlyCurvedWallet: ImageConstant.imgIconlyCurvedWallet,
-                payments: "Aktivasi Kontrakan".tr,
-                onPressed: () async {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ActiveProperty()),
-                  );
-                },
-              ),
+              _activasiKontrakan(),
               SizedBox(height: 20.v),
               const Divider(),
               SizedBox(height: 19.v),
@@ -189,10 +188,30 @@ class _HomeProfileState extends State<HomeProfile> {
           margin: EdgeInsets.fromLTRB(24.h, 14.v, 24.h, 13.v),
           onTap: () async {
             FirebaseAuth.instance.signOut();
+            return const AuthPage();
           },
         ),
       ],
     );
+  }
+
+  Widget _activasiKontrakan() {
+    if (role == 'admin') {
+      return _buildAutoLayoutHorizontal(
+        iconlyCurvedWallet: ImageConstant.imgIconlyCurvedWallet,
+        payments: "Aktivasi Kontrakan".tr,
+        onPressed: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ActiveProperty(),
+            ),
+          );
+        },
+      );
+    } else {
+      return Container(); // Change Container() to the default widget you want to return.
+    }
   }
 
   Widget _buildAutoLayoutHorizontal({

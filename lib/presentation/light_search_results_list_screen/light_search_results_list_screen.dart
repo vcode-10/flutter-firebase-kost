@@ -51,9 +51,10 @@ class LightSearchResultsListScreen
               onTapArrowLeft();
             }),
         title: AppbarTitleEdittextOne(
-            margin: EdgeInsets.only(left: 16.h),
-            hintText: "lbl_homes".tr,
-            controller: controller.stateFilledSearchController));
+          margin: EdgeInsets.only(left: 16.h),
+          hintText: "lbl_homes".tr,
+          controller: controller.stateFilledSearchController,
+        ));
   }
 
   /// Section Widget

@@ -520,9 +520,9 @@ class _CreatePageState extends State<CreatePage> {
         Map<String, String> dataKontrakan = {
           'userId': '${user?.uid}',
           'namaKontrakan': nameKontrakan.text.toLowerCase(),
-          'tipeKontrakan': tipeKamar.text,
+          'tipeKontrakan': tipeKamar.text.toLowerCase(),
           'disewakan': disewakan.toString(),
-          'tentangKontrakan': tentangKontrakan.text,
+          'tentangKontrakan': tentangKontrakan.text.toLowerCase(),
           'hargaPerBulan': pricePerMonth.text,
           'kabupaten': kabupatenKontrakan.text.toLowerCase(),
           'kacamatan': kacamatanKontrakan.text.toLowerCase(),
@@ -535,6 +535,7 @@ class _CreatePageState extends State<CreatePage> {
           'urlFotoDepan': urlFotoDepan,
           'urlDapur': urlDapur,
           'urlKamar': urlKamar,
+          'role': 'user',
           'searchField':
               '${nameKontrakan.text.toLowerCase()}_${kabupatenKontrakan.text.toLowerCase()}_${kacamatanKontrakan.text.toLowerCase()}_${kelurahanKontrakan.text.toLowerCase()}_${alamatKontrakan.text.toLowerCase()}',
         };

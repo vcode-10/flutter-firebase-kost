@@ -1,17 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/pages/auth_checker.dart';
 import 'package:projectkost/pages/home_page.dart';
 import 'package:projectkost/pages/home_profile.dart';
 import 'package:projectkost/pages/property_page.dart';
-import 'package:projectkost/widgets/app_bar/appbar_leading_circleimage.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_image.dart';
-import 'package:projectkost/widgets/app_bar/appbar_subtitle.dart';
 import 'package:projectkost/widgets/app_bar/appbar_title_edittext_one.dart';
-import 'package:projectkost/widgets/app_bar/appbar_trailing_image.dart';
 import 'package:projectkost/widgets/app_bar/custom_app_bar.dart';
 import 'package:projectkost/widgets/custom_bottom_bar.dart';
 import 'package:projectkost/widgets/custom_elevated_button.dart';
@@ -65,119 +62,147 @@ class _SearchPageState extends State<SearchPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 23.v),
                   FirebaseAnimatedList(
                     query: query,
                     shrinkWrap: true,
                     itemBuilder: (context, snapshot, animation, index) {
                       Map dataArray = snapshot.value as Map;
                       dataArray['key'] = snapshot.key;
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PropertyPage(
-                                property_key: dataArray['key'],
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PropertyPage(
+                                  property_key: dataArray['key'],
+                                ),
                               ),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(14.h),
+                            decoration:
+                                AppDecoration.outlineOnErrorContainer.copyWith(
+                              borderRadius: BorderRadiusStyle.circleBorder28,
                             ),
-                          );
-                          print(dataArray['urlThumbnail']);
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(14.h),
-                          decoration:
-                              AppDecoration.outlineOnErrorContainer.copyWith(
-                            borderRadius: BorderRadiusStyle.circleBorder28,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                height: 120.adaptSize,
-                                width: 120.adaptSize,
-                                child: Stack(
-                                  alignment: Alignment.topRight,
-                                  children: [
-                                    CustomImageView(
-                                      imagePath: dataArray['urlThumbnail'],
-                                      height: 120.adaptSize,
-                                      width: 120.adaptSize,
-                                      radius: BorderRadius.circular(
-                                        20.h,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  height: 120.adaptSize,
+                                  width: 120.adaptSize,
+                                  child: Stack(
+                                    alignment: Alignment.topRight,
+                                    children: [
+                                      CustomImageView(
+                                        imagePath: dataArray['urlThumbnail'],
+                                        height: 120.adaptSize,
+                                        width: 120.adaptSize,
+                                        radius: BorderRadius.circular(
+                                          20.h,
+                                        ),
+                                        alignment: Alignment.center,
                                       ),
-                                      alignment: Alignment.center,
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  left: 16.h,
-                                  top: 19.v,
-                                  bottom: 19.v,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      width: 110.h,
-                                      child: Text(
-                                        dataArray['namaKontrakan'],
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: CustomTextStyles
-                                            .titleLargeGray90001
-                                            .copyWith(
-                                          height: 1.20,
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 16.h,
+                                    top: 19.v,
+                                    bottom: 19.v,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        width: 110.h,
+                                        child: Text(
+                                          dataArray['namaKontrakan']
+                                              .split(' ')
+                                              .map((word) => word.isNotEmpty
+                                                  ? '${word[0].toUpperCase()}${word.substring(1)}'
+                                                  : '')
+                                              .join(' '),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: CustomTextStyles
+                                              .titleLargeGray90001
+                                              .copyWith(
+                                            height: 1.20,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(height: 10.v),
-                                    Text(
-                                      dataArray['namaKontrakan'],
-                                      style: CustomTextStyles.bodyMediumGray700,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Spacer(),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  top: 14.v,
-                                  right: 4.h,
-                                  bottom: 14.v,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    CustomElevatedButton(
-                                      height: 25.v,
-                                      width: 90.h,
-                                      text: dataArray['disewakan'],
-                                      margin: EdgeInsets.only(
-                                        top: 12.v,
-                                        right: 12.h,
+                                      SizedBox(height: 10.v),
+                                      Text(
+                                        dataArray['kabupaten']
+                                            .toString()
+                                            .replaceFirstMapped(
+                                              RegExp(r'\b\w'),
+                                              (match) =>
+                                                  match
+                                                      .group(0)
+                                                      ?.toUpperCase() ??
+                                                  '',
+                                            ),
+                                        style:
+                                            CustomTextStyles.bodyMediumGray700,
                                       ),
-                                    ),
-                                    SizedBox(height: 24.v),
-                                    Text(
-                                      'Rp ${dataArray['hargaPerBulan']}',
-                                      style:
-                                          CustomTextStyles.headlineSmallPrimary,
-                                    ),
-
-                                    SizedBox(height: 5.v),
-                                    // Obx(
-                                    //   () => Text(
-                                    //     currentItem.night!.value,
-                                    //     style: theme.textTheme.bodySmall,
-                                    //   ),
-                                    // ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                                const Spacer(),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: 14.v,
+                                    right: 4.h,
+                                    bottom: 14.v,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      CustomElevatedButton(
+                                        height: 25.v,
+                                        width: 120.h,
+                                        text: dataArray['disewakan']
+                                            .toString()
+                                            .split(' ')
+                                            .map((word) => word.isNotEmpty
+                                                ? '${word[0].toUpperCase()}${word.substring(1)}'
+                                                : '')
+                                            .join(' '),
+                                        margin: EdgeInsets.only(
+                                          top: 12.v,
+                                          right: 12.h,
+                                        ),
+                                      ),
+                                      SizedBox(height: 24.v),
+                                      Text(
+                                        NumberFormat.currency(
+                                          locale: 'id_ID',
+                                          symbol: 'Rp',
+                                          decimalDigits: 0,
+                                        ).format(
+                                            dataArray['hargaPerBulan'] ?? 0),
+                                        style: CustomTextStyles
+                                            .headlineSmallPrimary,
+                                      ),
+
+                                      SizedBox(height: 5.v),
+                                      // Obx(
+                                      //   () => Text(
+                                      //     currentItem.night!.value,
+                                      //     style: theme.textTheme.bodySmall,
+                                      //   ),
+                                      // ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -193,19 +218,38 @@ class _SearchPageState extends State<SearchPage> {
     ));
   }
 
-  /// Section Widget
+  // /// Section Widget
   PreferredSizeWidget _buildAppBar() {
     return CustomAppBar(
       leadingWidth: 52.h,
-      title: TextField(
-        controller: searchController,
-        decoration: InputDecoration(
-          hintText: 'Search...',
+      title: Container(
+        margin: EdgeInsets.zero, // You can adjust the margin as needed
+        child: Row(
+          children: [
+            Container(
+              margin: EdgeInsets.fromLTRB(20.h, 18.v, 12.h, 18.v),
+              child: CustomImageView(
+                imagePath: ImageConstant.imgSearch,
+                height: 20.adaptSize,
+                width: 20.adaptSize,
+              ),
+            ),
+            Expanded(
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: "Search".tr,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 18.v),
+                ),
+                onSubmitted: (String value) {
+                  // Update the query when the user submits the search
+                  updateQuery();
+                },
+              ),
+            ),
+          ],
         ),
-        onSubmitted: (String value) {
-          // Update the query when the user submits the search
-          updateQuery();
-        },
       ),
     );
   }

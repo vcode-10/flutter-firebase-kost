@@ -3,12 +3,11 @@ import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/pages/auth_checker.dart';
-import 'package:projectkost/pages/home_page.dart';
 import 'package:projectkost/pages/home_profile.dart';
+import 'package:projectkost/pages/property_page.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_image.dart';
 import 'package:projectkost/widgets/app_bar/appbar_subtitle.dart';
 import 'package:projectkost/widgets/app_bar/custom_app_bar.dart';
-import 'package:projectkost/widgets/custom_elevated_button.dart';
 
 class ActiveProperty extends StatefulWidget {
   const ActiveProperty({super.key});
@@ -32,18 +31,16 @@ class _ActivePropertyState extends State<ActiveProperty> {
             itemBuilder: (context, snapshot, animation, index) {
               Map dataArray = snapshot.value as Map;
               dataArray['key'] = snapshot.key;
-              print(dataArray);
               return GestureDetector(
                 onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) => UpdateRecord(
-                  //       dataArray_Key: dataArray['key'],
-                  //     ),
-                  //   ),
-                  // );
-                  // print(dataArray['urlThumbnail']);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PropertyPage(
+                        property_key: dataArray['key'],
+                      ),
+                    ),
+                  );
                 },
                 child: Container(
                   padding: EdgeInsets.all(14.h),
@@ -83,7 +80,12 @@ class _ActivePropertyState extends State<ActiveProperty> {
                             SizedBox(
                               width: 110.h,
                               child: Text(
-                                dataArray['namaKontrakan'],
+                                dataArray['namaKontrakan']
+                                    .split(' ')
+                                    .map((word) => word.isNotEmpty
+                                        ? '${word[0].toUpperCase()}${word.substring(1)}'
+                                        : '')
+                                    .join(' '),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: CustomTextStyles.titleLargeGray90001
@@ -94,7 +96,13 @@ class _ActivePropertyState extends State<ActiveProperty> {
                             ),
                             SizedBox(height: 10.v),
                             Text(
-                              dataArray['namaKontrakan'],
+                              dataArray['kabupaten']
+                                  .toString()
+                                  .replaceFirstMapped(
+                                    RegExp(r'\b\w'),
+                                    (match) =>
+                                        match.group(0)?.toUpperCase() ?? '',
+                                  ),
                               style: CustomTextStyles.bodyMediumGray700,
                             ),
                           ],
@@ -129,14 +137,7 @@ class _ActivePropertyState extends State<ActiveProperty> {
                                 db_Ref.child(dataArray['key']).remove();
                               },
                             ),
-
                             SizedBox(height: 5.v),
-                            // Obx(
-                            //   () => Text(
-                            //     currentItem.night!.value,
-                            //     style: theme.textTheme.bodySmall,
-                            //   ),
-                            // ),
                           ],
                         ),
                       ),

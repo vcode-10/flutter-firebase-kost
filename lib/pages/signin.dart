@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/core/utils/validation_functions.dart';
+import 'package:projectkost/pages/auth_page.dart';
+import 'package:projectkost/pages/home_page.dart';
 import 'package:projectkost/pages/singup.dart';
 import 'package:projectkost/widgets/custom_elevated_button.dart';
 import 'package:projectkost/widgets/custom_text_form_field.dart';
@@ -19,6 +21,8 @@ class _SignInState extends State<SignIn> {
   final TextEditingController _email = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
+
+  bool isShowPassword = false;
 
   @override
   Widget build(BuildContext context) {
@@ -75,10 +79,12 @@ class _SignInState extends State<SignIn> {
                         height: 20.adaptSize,
                         width: 20.adaptSize)),
                 prefixConstraints: BoxConstraints(maxHeight: 60.v),
+                obscureText: !isShowPassword,
                 suffix: InkWell(
                     onTap: () {
-                      // controller.isShowPassword.value =
-                      //     !controller.isShowPassword.value;
+                      setState(() {
+                        isShowPassword = !isShowPassword;
+                      });
                     },
                     child: Container(
                         margin: EdgeInsets.fromLTRB(30.h, 20.v, 20.h, 20.v),
@@ -147,8 +153,13 @@ class _SignInState extends State<SignIn> {
 
   signInWithEmailAndPassword() async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _email.text, password: _password.text);
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: _email.text, password: _password.text)
+          .whenComplete(() => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+              ));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');

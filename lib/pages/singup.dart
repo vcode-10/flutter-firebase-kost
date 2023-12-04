@@ -23,6 +23,7 @@ class _SignUpState extends State<SignUp> {
   final TextEditingController _name = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool isLoading = false;
+  bool isShowPassword = false;
   final DatabaseReference _databaseReference =
       FirebaseDatabase.instance.ref().child("users");
 
@@ -139,10 +140,12 @@ class _SignUpState extends State<SignUp> {
                           height: 20.adaptSize,
                           width: 20.adaptSize)),
                   prefixConstraints: BoxConstraints(maxHeight: 60.v),
+                  obscureText: !isShowPassword,
                   suffix: InkWell(
                       onTap: () {
-                        // controller.isShowPassword.value =
-                        //     !controller.isShowPassword.value;
+                        setState(() {
+                          isShowPassword = !isShowPassword;
+                        });
                       },
                       child: Container(
                           margin: EdgeInsets.fromLTRB(30.h, 20.v, 20.h, 20.v),

@@ -9,13 +9,11 @@ class AppbarTitleEdittextOne extends StatelessWidget {
     this.hintText,
     this.controller,
     this.margin,
-    this.onSearchSubmitted,
   }) : super(
           key: key,
         );
 
   String? hintText;
-  VoidCallback? onSearchSubmitted;
 
   TextEditingController? controller;
 

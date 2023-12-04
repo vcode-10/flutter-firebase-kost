@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:projectkost/pages/home_profile.dart';
 import 'package:projectkost/pages/property_page.dart';
 import 'package:projectkost/pages/search_page.dart';
@@ -28,6 +29,10 @@ class _HomePageState extends State<HomePage> {
       FirebaseDatabase.instance.reference().child('properties');
   List<Map<dynamic, dynamic>> propertiesList = [];
 
+  int queryStart = 1;
+  int queryEnd = 1;
+  var tipeRaw = 'status';
+
   @override
   void initState() {
     super.initState();
@@ -41,31 +46,41 @@ class _HomePageState extends State<HomePage> {
 
     Map dataUser = snapshot.value as Map;
     setState(() {
-      username = dataUser['username'].toString();
+      username = dataUser['username']
+          .toString()
+          .split(' ')
+          .map((word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '')
+          .join(' ');
       urlImageProfile = dataUser['urlImageProfile'];
     });
   }
 
+  void updateQuery(String newTipeRaw, int newHargaAwal, int newHargaAkhir) {
+    setState(() {
+      tipeRaw = newTipeRaw;
+      queryStart = newHargaAwal;
+      queryEnd = newHargaAkhir;
+    });
+
+    propertyData();
+  }
+
   void propertyData() async {
     propertiesRef
-        .orderByChild('status')
-        .equalTo('true')
+        .orderByChild(tipeRaw)
+        .startAt(queryStart)
+        .endAt(queryEnd)
         .onValue
         .listen((event) {
       if (mounted) {
         setState(() {
-          propertiesList.clear(); // Clear the previous data
-
-          // Loop through the snapshot to get all properties
+          propertiesList.clear();
           if (event.snapshot.value is Map) {
             (event.snapshot.value as Map).forEach((key, value) {
-              // Assuming each property is stored as a Map
               Map property = value;
-
-              // Add the key to the property map
               property['key'] = key;
-
-              // Add the property to the list
               propertiesList.add(property);
             });
           }
@@ -78,12 +93,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
         appBar: _buildAppBar(),
         body: SizedBox(
           width: double.maxFinite,
           child: Column(
             children: [
+              SizedBox(height: 24.v),
+              _buildAll(),
               SizedBox(height: 20.v),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.h),
@@ -112,6 +128,62 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildAll() {
+    return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: IntrinsicWidth(
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 8.0), // Adjust the horizontal padding as needed
+            child: CustomElevatedButton(
+              height: 50.v,
+              width: 80.h,
+              text: 'All',
+              onPressed: () {
+                updateQuery('status', 1, 1);
+              },
+              decoration: AppDecoration.fillPrimary1
+                  .copyWith(borderRadius: BorderRadiusStyle.roundedBorder20),
+              buttonStyle: CustomButtonStyles.outlinePrimary,
+              buttonTextStyle: CustomTextStyles.titleMediumSemiBold_1,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 8.0), // Adjust the horizontal padding as needed
+            child: CustomElevatedButton(
+              height: 50.v,
+              width: 100.h,
+              text: '0 - 500K',
+              onPressed: () {
+                updateQuery('hargaPerBulan', 0, 500000);
+              },
+              decoration: AppDecoration.fillPrimary1
+                  .copyWith(borderRadius: BorderRadiusStyle.roundedBorder20),
+              buttonStyle: CustomButtonStyles.outlinePrimary,
+              buttonTextStyle: CustomTextStyles.titleMediumSemiBold_1,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 8.0), // Adjust the horizontal padding as needed
+            child: CustomElevatedButton(
+              height: 50.v,
+              width: 120.h,
+              text: '500 - 1000K',
+              onPressed: () {
+                updateQuery('hargaPerBulan', 900000, 1000000);
+              },
+              decoration: AppDecoration.fillPrimary1
+                  .copyWith(borderRadius: BorderRadiusStyle.roundedBorder20),
+              buttonStyle: CustomButtonStyles.outlinePrimary,
+              buttonTextStyle: CustomTextStyles.titleMediumSemiBold_1,
+            ),
+          ),
+        ])));
+  }
+
   Widget buildPropertyCard(Map property) {
     return GestureDetector(
       onTap: () {
@@ -123,7 +195,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         );
-        print(property['urlThumbnail']);
       },
       child: Container(
         padding: EdgeInsets.all(14.h),
@@ -142,7 +213,7 @@ class _HomePageState extends State<HomePage> {
                 alignment: Alignment.topRight,
                 children: [
                   CustomImageView(
-                    imagePath: urlImageProfile,
+                    imagePath: property['urlThumbnail'],
                     height: 154.adaptSize,
                     width: 154.adaptSize,
                     radius: BorderRadius.circular(
@@ -153,7 +224,13 @@ class _HomePageState extends State<HomePage> {
                   CustomElevatedButton(
                     height: 22.v,
                     width: 100.h,
-                    text: property['disewakan'] ?? '',
+                    text: property['disewakan']
+                        .toString()
+                        .split(' ')
+                        .map((word) => word.isNotEmpty
+                            ? '${word[0].toUpperCase()}${word.substring(1)}'
+                            : '')
+                        .join(' '),
                     margin: EdgeInsets.only(
                       top: 12.v,
                       right: 12.h,
@@ -166,19 +243,31 @@ class _HomePageState extends State<HomePage> {
             ),
             SizedBox(height: 11.v),
             Text(
-              property['namaKontrakan'],
+              property['namaKontrakan']
+                  .split(' ')
+                  .map((word) => word.isNotEmpty
+                      ? '${word[0].toUpperCase()}${word.substring(1)}'
+                      : '')
+                  .join(' '),
               style: CustomTextStyles.titleMediumGray9000118_1,
             ),
             SizedBox(height: 12.v),
             Text(
-              property['kabupaten'],
+              property['kabupaten'].toString().replaceFirstMapped(
+                    RegExp(r'\b\w'),
+                    (match) => match.group(0)?.toUpperCase() ?? '',
+                  ),
               style: CustomTextStyles.labelMediumGray700,
             ),
             SizedBox(height: 8.v),
             Row(
               children: [
                 Text(
-                  'Rp. ${property['hargaPerBulan']}',
+                  NumberFormat.currency(
+                    locale: 'id_ID',
+                    symbol: 'Rp',
+                    decimalDigits: 0,
+                  ).format(property['hargaPerBulan'] ?? 0),
                   style: CustomTextStyles.titleLargePrimary,
                 ),
                 Padding(
@@ -190,15 +279,6 @@ class _HomePageState extends State<HomePage> {
                   child: Text(
                     '/ Malam',
                     style: theme.textTheme.bodySmall,
-                  ),
-                ),
-                CustomImageView(
-                  imagePath: ImageConstant.imgIconlyLightOutlineHeart,
-                  height: 20.adaptSize,
-                  width: 20.adaptSize,
-                  margin: EdgeInsets.only(
-                    left: 67.h,
-                    bottom: 2.v,
                   ),
                 ),
               ],
