@@ -26,7 +26,7 @@ class _ActivePropertyState extends State<ActiveProperty> {
         child: Scaffold(
           appBar: _buildAppBar(),
           body: FirebaseAnimatedList(
-            query: db_Ref.orderByChild('status').equalTo('false'),
+            query: db_Ref.orderByChild('status').equalTo(0),
             shrinkWrap: true,
             itemBuilder: (context, snapshot, animation, index) {
               Map dataArray = snapshot.value as Map;

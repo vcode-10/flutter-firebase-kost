@@ -281,7 +281,9 @@ class _PropertyPageState extends State<PropertyPage> {
   }
 
   void launchWhatsApp(String phoneNumber) async {
-    String url = "https://wa.me/+62$phoneNumber";
+    // String url = "https://wa.me/+62$phoneNumber";
+    String url = "https://api.whatsapp.com/send/?phone=%2B62$phoneNumber";
+    print(url);
     if (await canLaunch(url)) {
       await launch(url);
     } else {

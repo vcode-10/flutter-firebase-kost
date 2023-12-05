@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
@@ -19,16 +20,17 @@ class HomeProperty extends StatefulWidget {
 }
 
 class _HomePropertyState extends State<HomeProperty> {
+  final user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
-    DatabaseReference db_Ref =
+    DatabaseReference dbRef =
         FirebaseDatabase.instance.ref().child('properties');
     return AuthChecker(
       child: SafeArea(
         child: Scaffold(
           appBar: _buildAppBar(),
           body: FirebaseAnimatedList(
-            query: db_Ref,
+            query: dbRef.orderByChild('userId').equalTo(user?.uid),
             shrinkWrap: true,
             itemBuilder: (context, snapshot, animation, index) {
               Map dataArray = snapshot.value as Map;
@@ -153,7 +155,7 @@ class _HomePropertyState extends State<HomeProperty> {
                                   color: Colors.blue[900],
                                 ),
                                 onPressed: () {
-                                  db_Ref.child(dataArray['key']).remove();
+                                  dbRef.child(dataArray['key']).remove();
                                 },
                               ),
                             ],

@@ -57,7 +57,12 @@ class _CreatePageState extends State<CreatePage> {
   File? imageDepan;
   File? imageDapur;
   File? imageKamar;
-  ImagePicker image = ImagePicker();
+  ImagePicker image1 = ImagePicker();
+  ImagePicker image2 = ImagePicker();
+  ImagePicker image3 = ImagePicker();
+  ImagePicker image4 = ImagePicker();
+  ImagePicker image5 = ImagePicker();
+  ImagePicker image6 = ImagePicker();
   bool status = false;
   bool isCheckedAC = false;
   bool isCheckedCCTV = false;
@@ -429,8 +434,7 @@ class _CreatePageState extends State<CreatePage> {
           padding: EdgeInsets.all(20.h),
           decoration: IconButtonStyleHelper.outlineGray,
           onTap: onTap != null ? () => onTap() : null,
-          child: CustomImageView(
-              imagePath: ImageConstant.imgAutoLayoutHorizontal56x56)),
+          child: _buildImageWidget()),
       SizedBox(height: 11.v),
       Text(gallery,
           style: CustomTextStyles.titleMediumGray800SemiBold
@@ -438,46 +442,108 @@ class _CreatePageState extends State<CreatePage> {
     ]);
   }
 
+  Widget _buildImageWidget() {
+    if (imageThumbnail != null) {
+      return Image.file(
+        imageThumbnail!,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+      );
+    } else if (imageDapur != null) {
+      return Image.file(
+        imageDapur!,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+      );
+    } else if (imageDepan != null) {
+      return Image.file(
+        imageDepan!,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+      );
+    } else if (imageKamarMandi != null) {
+      return Image.file(
+        imageKamarMandi!,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+      );
+    } else if (imageKamar != null) {
+      return Image.file(
+        imageKamar!,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+      );
+    } else if (imageRuangTengah != null) {
+      return Image.file(
+        imageRuangTengah!,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return CustomImageView(
+        imagePath: ImageConstant.imgAutoLayoutHorizontal56x56,
+      );
+    }
+  }
+
   getThumbnail() async {
-    var img = await image.pickImage(source: ImageSource.gallery);
-    setState(() {
-      imageThumbnail = File(img!.path);
-    });
+    var img1 = await image1.pickImage(source: ImageSource.gallery);
+    if (img1 != null) {
+      setState(() {
+        imageThumbnail = File(img1.path);
+      });
+    }
   }
 
   getDapur() async {
-    var img = await image.pickImage(source: ImageSource.gallery);
-    setState(() {
-      imageDapur = File(img!.path);
-    });
+    var img2 = await image2.pickImage(source: ImageSource.gallery);
+    if (img2 != null) {
+      setState(() {
+        imageDapur = File(img2.path);
+      });
+    }
   }
 
   getDepan() async {
-    var img = await image.pickImage(source: ImageSource.gallery);
-    setState(() {
-      imageDepan = File(img!.path);
-    });
+    var img3 = await image3.pickImage(source: ImageSource.gallery);
+    if (img3 != null) {
+      setState(() {
+        imageDepan = File(img3.path);
+      });
+    }
   }
 
   getKamarMandi() async {
-    var img = await image.pickImage(source: ImageSource.gallery);
-    setState(() {
-      imageKamarMandi = File(img!.path);
-    });
+    var img4 = await image4.pickImage(source: ImageSource.gallery);
+    if (img4 != null) {
+      setState(() {
+        imageKamarMandi = File(img4.path);
+      });
+    }
   }
 
   getRuangTengah() async {
-    var img = await image.pickImage(source: ImageSource.gallery);
-    setState(() {
-      imageRuangTengah = File(img!.path);
-    });
+    var img5 = await image5.pickImage(source: ImageSource.gallery);
+    if (img5 != null) {
+      setState(() {
+        imageRuangTengah = File(img5.path);
+      });
+    }
   }
 
   getKamar() async {
-    var img = await image.pickImage(source: ImageSource.gallery);
-    setState(() {
-      imageKamar = File(img!.path);
-    });
+    var img6 = await image6.pickImage(source: ImageSource.gallery);
+    if (img6 != null) {
+      setState(() {
+        imageKamar = File(img6.path);
+      });
+    }
   }
 
   String generateRandomFileName() {
@@ -496,6 +562,8 @@ class _CreatePageState extends State<CreatePage> {
   }
 
   uploadData() async {
+    int status = 0;
+    int hargaPerBulanNew = int.parse(pricePerMonth.text);
     try {
       urlThumbnail = await uploadImage(imageThumbnail);
       urlFotoDepan = await uploadImage(
@@ -517,18 +585,18 @@ class _CreatePageState extends State<CreatePage> {
       });
 
       if (urlThumbnail != null) {
-        Map<String, String> dataKontrakan = {
+        Map<dynamic, dynamic> dataKontrakan = {
           'userId': '${user?.uid}',
           'namaKontrakan': nameKontrakan.text.toLowerCase(),
           'tipeKontrakan': tipeKamar.text.toLowerCase(),
           'disewakan': disewakan.toString(),
           'tentangKontrakan': tentangKontrakan.text.toLowerCase(),
-          'hargaPerBulan': pricePerMonth.text,
+          'hargaPerBulan': hargaPerBulanNew,
           'kabupaten': kabupatenKontrakan.text.toLowerCase(),
           'kacamatan': kacamatanKontrakan.text.toLowerCase(),
           'kelurahan': kelurahanKontrakan.text.toLowerCase(),
           'alamat': alamatKontrakan.text.toLowerCase(),
-          'status': 'false',
+          'status': status,
           'urlRuangTengah': urlRuangTengah,
           'urlKamarMandi': urlKamarMandi,
           'urlThumbnail': urlThumbnail,
