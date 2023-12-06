@@ -13,6 +13,7 @@ import 'package:projectkost/widgets/app_bar/appbar_leading_image.dart';
 import 'package:projectkost/widgets/app_bar/appbar_trailing_image.dart';
 import 'package:projectkost/widgets/app_bar/custom_app_bar.dart';
 import 'package:projectkost/widgets/custom_elevated_button.dart';
+import 'package:projectkost/widgets/custom_icon_button.dart';
 import 'package:projectkost/widgets/custom_image_view.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,6 +43,8 @@ class _PropertyPageState extends State<PropertyPage> {
   var urlKamar;
   var urlKamarMandi;
   var urlRuangTengah;
+  var longitude;
+  var latitude;
   DatabaseReference refUser = FirebaseDatabase.instance.ref().child('users');
   @override
   initState() {
@@ -70,6 +73,8 @@ class _PropertyPageState extends State<PropertyPage> {
       urlKamar = dataUser['urlKamar'];
       urlKamarMandi = dataUser['urlKamarMandi'];
       urlRuangTengah = dataUser['urlRuangTengah'];
+      latitude = dataUser['latitude'].toString();
+      longitude = dataUser['longitude'].toString();
     });
   }
 
@@ -211,9 +216,10 @@ class _PropertyPageState extends State<PropertyPage> {
                       child: Row(
                         children: [
                           CustomImageView(
-                              imagePath: ImageConstant.imgIconlyBoldLocation,
-                              height: 20.adaptSize,
-                              width: 20.adaptSize),
+                            imagePath: ImageConstant.imgIconlyBoldLocation,
+                            height: 20.adaptSize,
+                            width: 20.adaptSize,
+                          ),
                           Padding(
                               padding: EdgeInsets.only(left: 8.h, top: 3.v),
                               child: Text(
@@ -281,14 +287,15 @@ class _PropertyPageState extends State<PropertyPage> {
   }
 
   void launchWhatsApp(String phoneNumber) async {
-    // String url = "https://wa.me/+62$phoneNumber";
-    String url = "https://api.whatsapp.com/send/?phone=%2B62$phoneNumber";
-    print(url);
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
+    var whatsappUrl = "whatsapp://send?phone=%2B62$phoneNumber&text=Halo";
+    await launch(whatsappUrl);
+  }
+
+  void _launchGoogleMaps() async {
+    var lat = latitude;
+    var lon = longitude;
+    var urlMaps = 'https://www.google.com/maps/search/?api=1&query=$lat,$lon';
+    await launch(urlMaps);
   }
 
   /// Section Widget
@@ -365,58 +372,16 @@ class _PropertyPageState extends State<PropertyPage> {
       height: 200.v,
       width: 380.h,
       child: Stack(
-        alignment: Alignment.centerRight,
+        alignment: Alignment.center,
         children: [
-          Align(
-              alignment: Alignment.center,
-              child: Container(
-                  decoration: AppDecoration.fillBlue.copyWith(
-                      borderRadius: BorderRadiusStyle.roundedBorder24),
-                  child: CustomImageView(
-                      imagePath: ImageConstant.imgVectorWhiteA700,
-                      height: 200.v,
-                      width: 380.h,
-                      radius: BorderRadius.circular(24.h)))),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: 14.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    margin:
-                        EdgeInsets.only(left: 26.h, top: 49.v, bottom: 57.v),
-                    padding: EdgeInsets.all(10.h),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadiusStyle.roundedBorder24,
-                        image: DecorationImage(
-                            image: AssetImage(ImageConstant.imgGroup61x52),
-                            fit: BoxFit.cover)),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(height: 6.v),
-                        Container(
-                            height: 32.adaptSize,
-                            width: 32.adaptSize,
-                            decoration: AppDecoration.outlineWhiteA.copyWith(
-                                borderRadius:
-                                    BorderRadiusStyle.roundedBorder16),
-                            child: CustomImageView(
-                                imagePath: ImageConstant.imgEllipse32x32,
-                                height: 32.adaptSize,
-                                width: 32.adaptSize,
-                                radius: BorderRadius.circular(16.h),
-                                alignment: Alignment.center)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          CustomIconButton(
+            height: 200.adaptSize,
+            width: 380.adaptSize,
+            decoration: IconButtonStyleHelper.outlineGray,
+            onTap: () {
+              _launchGoogleMaps();
+            },
+            child: CustomImageView(imagePath: ImageConstant.imgVectorGray80001),
           ),
         ],
       ),

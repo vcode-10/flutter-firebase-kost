@@ -22,24 +22,18 @@ import 'package:projectkost/widgets/custom_elevated_button.dart';
 import 'package:projectkost/widgets/custom_icon_button.dart';
 import 'package:projectkost/widgets/custom_text_form_field.dart';
 
-class CreatePage extends StatefulWidget {
-  const CreatePage({super.key});
+class EditPage extends StatefulWidget {
+  String propertyKey;
+  EditPage({required this.propertyKey});
 
   @override
-  State<CreatePage> createState() => _CreatePageState();
+  State<EditPage> createState() => _EditPageState();
 }
 
-class _CreatePageState extends State<CreatePage> {
+class _EditPageState extends State<EditPage> {
   final user = FirebaseAuth.instance.currentUser;
   DatabaseReference? _databaseReference;
   Position? currentLocation;
-
-  @override
-  void initState() {
-    super.initState();
-    _databaseReference = FirebaseDatabase.instance.ref().child("properties");
-  }
-
   final TextEditingController nameKontrakan = TextEditingController();
   final TextEditingController tipeKamar = TextEditingController();
   final TextEditingController tentangKontrakan = TextEditingController();
@@ -50,6 +44,8 @@ class _CreatePageState extends State<CreatePage> {
   final TextEditingController kelurahanKontrakan = TextEditingController();
   var longController;
   var latController;
+  var longOldController;
+  var latOldController;
   var mapController;
   var urlRuangTengah;
   var urlKamarMandi;
@@ -85,6 +81,42 @@ class _CreatePageState extends State<CreatePage> {
   bool isCheckedRokok = false;
   String? _currentAddress;
   Position? _currentPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    _databaseReference = FirebaseDatabase.instance.ref().child("properties");
+    propertyData();
+  }
+
+  void propertyData() async {
+    DataSnapshot snapshot =
+        await _databaseReference!.child(widget.propertyKey).get();
+
+    Map property = snapshot.value as Map;
+    print(property);
+    setState(() {
+      nameKontrakan.text = property['namaKontrakan'];
+      tipeKamar.text = property['tipeKontrakan'];
+      // disewakan.text = property['disewakan'];
+      tentangKontrakan.text = property['tentangKontrakan'].toString();
+      pricePerMonth.text = property['hargaPerBulan'].toString();
+      kabupatenKontrakan.text = property['kabupaten'].toString();
+      kacamatanKontrakan.text = property['kacamatan'].toString();
+      kelurahanKontrakan.text = property['kelurahan'].toString();
+      alamatKontrakan.text = property['alamat'].toString();
+
+      urlRuangTengah = property['urlRuangTengah'];
+      urlKamarMandi = property['urlKamarMandi'];
+      urlThumbnail = property['urlThumbnail'];
+      urlFotoDepan = property['urlFotoDepan'];
+      urlDapur = property['urlDapur'];
+      urlKamar = property['urlKamar'];
+      latOldController = property['latitude'];
+      longOldController = property['longitude'];
+      // Contact['alamatmaps'];
+    });
+  }
 
   Future<bool> _handleLocationPermission() async {
     bool serviceEnabled;
@@ -299,6 +331,9 @@ class _CreatePageState extends State<CreatePage> {
                             .copyWith(color: appTheme.gray800),
                       ),
                       const SizedBox(height: 15),
+                      Text(
+                        'Lama ${longOldController}  ${latOldController}',
+                      ),
                       Text(
                         '${_currentPosition?.longitude ?? ""}  ${_currentPosition?.latitude ?? ""}',
                       ),
@@ -766,6 +801,7 @@ class _CreatePageState extends State<CreatePage> {
           'urlFotoDepan': urlFotoDepan,
           'urlDapur': urlDapur,
           'urlKamar': urlKamar,
+          'role': 'user',
           'latitude': latController,
           'longitude': longController,
           'alamatmaps': mapController,

@@ -173,8 +173,8 @@ class _ActivePropertyState extends State<ActiveProperty> {
   }
 
   directupdate(String key) {
-    Map<String, String> property = {
-      'status': 'true',
+    Map<String, int> property = {
+      'status': 1,
     };
 
     FirebaseDatabase.instance

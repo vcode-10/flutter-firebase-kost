@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:projectkost/core/app_export.dart';
 import 'package:projectkost/pages/auth_checker.dart';
+import 'package:projectkost/pages/edit_page.dart';
 import 'package:projectkost/pages/home_profile.dart';
 import 'package:projectkost/pages/property_page.dart';
 import 'package:projectkost/widgets/app_bar/appbar_leading_image.dart';
@@ -155,7 +156,14 @@ class _HomePropertyState extends State<HomeProperty> {
                                   color: Colors.blue[900],
                                 ),
                                 onPressed: () {
-                                  dbRef.child(dataArray['key']).remove();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => EditPage(
+                                        propertyKey: dataArray['key'],
+                                      ),
+                                    ),
+                                  );
                                 },
                               ),
                             ],
